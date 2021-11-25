@@ -1,0 +1,1 @@
+[{"Width":5.0,"Height":6.0,"Depth":3.0,"X":0.0,"Y":0.0,"Z":0.0,"Weight":0.0,"Tag":null},{"Width":4.0,"Height":5.0,"Depth":2.0,"X":0.0,"Y":0.0,"Z":3.0,"Weight":0.0,"Tag":null},{"Width":1.0,"Height":4.0,"Depth":7.0,"X":4.0,"Y":0.0,"Z":3.0,"Weight":0.0,"Tag":null},{"Width":10.0,"Height":2.0,"Depth":12.0,"X":5.0,"Y":0.0,"Z":0.0,"Weight":0.0,"Tag":null}]
