@@ -50,7 +50,6 @@ public class SpawnerScript : MonoBehaviour
     void Start()
     {
         List<Cuboid> cubes = getCuboidsFromFile(WRITE_FILE_PATH);
-        Console.WriteLine(cubes);
         dimensions = new int[cubes.Count][];
         coordinates = new int[cubes.Count][];
 
@@ -75,21 +74,18 @@ public class SpawnerScript : MonoBehaviour
 
                 //Sets the label for each box
                 float newx = (coordinates[i][0] + (dimensions[i][0] / 2f));
-                Debug.Log(newx);
                 float newy = (coordinates[i][1] + (dimensions[i][1] / 2f));
-                Debug.Log(newy);
                 float newz = coordinates[i][2] + 0.5f;
-                Debug.Log(newz);
-                newobj.Find("Canvas").localPosition = new Vector3(newx, newy, newz);
+                newobj.Find("Canvas").localPosition = transform.InverseTransformPoint(new Vector3(newx, newy, newz));
+                
+                //Sets the text for the box's label
+                TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                labeltext.text = "Box #" + i.ToString();
                 
                 //Provides a collider so that boxes do not clip into each other
                 BoxCollider boxcoll = newobj.GetComponent<BoxCollider>();
                 boxcoll.size = new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]);
-                boxcoll.center = new Vector3(newx, newy, coordinates[i][2] + (dimensions[i][2] / 2f));
-
-                //Sets the text for the box's label
-                TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                labeltext.text = "Box #" + i.ToString();
+                boxcoll.center = new Vector3((coordinates[i][0] + (dimensions[i][0] / 2f)), (coordinates[i][1] + (dimensions[i][1] / 2f)), coordinates[i][2] + (dimensions[i][2] / 2f));
 
                 //Runs the prefab script so the box is generated
                 var newobjscript = newobj.GetComponent<BoxGenerator>();

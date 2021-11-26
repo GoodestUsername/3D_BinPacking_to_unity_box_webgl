@@ -59,7 +59,6 @@ class TextFileRead : MonoBehaviour
                 while ((line = streamReader.ReadLine()) != null)
                 {
                     string[] dimensions = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    Debug.Log(dimensions[0] + ", " + dimensions[1] + ", " + dimensions[2]);
                     Cuboid cube = new Cuboid(Int32.Parse(dimensions[0]), Int32.Parse(dimensions[1]), Int32.Parse(dimensions[2]));
                     cubes.Add(cube); 
                 }
@@ -118,11 +117,8 @@ class TextFileRead : MonoBehaviour
     [RuntimeInitializeOnLoadMethod]
     public static void BinPack()
     {
-        Debug.Log(READ_FILE_PATH);
-        Debug.Log(WRITE_FILE_PATH);
         IEnumerable<Cuboid> cubeList = getCuboidsFromFile(READ_FILE_PATH);
         var binPacker = BinPacker.GetDefault(BinPackerVerifyOption.BestOnly);
-        Debug.Log(cubeList);
         BinPackParameter parameter = new BinPackParameter(roomWidth, roomHeight, roomDepth, cubeList);
         var result = binPacker.Pack(parameter);
         writeCubeAndCoordsToFile(WRITE_FILE_PATH, result);
