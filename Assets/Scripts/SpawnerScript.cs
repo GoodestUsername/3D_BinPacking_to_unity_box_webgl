@@ -72,13 +72,13 @@ public class SpawnerScript : MonoBehaviour
         return binPacker.Pack(parameter);               
     }
 
-    string[][] jsonDeserializeBox(BoxListJSON boxes) {
-        string[][] boxarray = new string[boxes.boxlist.Length][];
-        for(int i = 0; i < boxes.boxlist.Length; i++) {
-            boxarray[i][0] = boxes.boxlist[i].id;
-            boxarray[i][1] = boxes.boxlist[i].x;
-            boxarray[i][2] = boxes.boxlist[i].y;
-            boxarray[i][3] = boxes.boxlist[i].z;
+    string[][] jsonDeserializeBox(BoxListJSON boxesjson) {
+        string[][] boxarray = new string[boxesjson.boxes.Length][];
+        for(int i = 0; i < boxesjson.boxes.Length; i++) {
+            boxarray[i][0] = boxesjson.boxes[i].id;
+            boxarray[i][1] = boxesjson.boxes[i].x;
+            boxarray[i][2] = boxesjson.boxes[i].y;
+            boxarray[i][3] = boxesjson.boxes[i].z;
         }
         return boxarray;
     }
@@ -92,9 +92,9 @@ public class SpawnerScript : MonoBehaviour
 
     }
     //Preliminary Method for Working With Database
-    void generateWebBoxes(string boxjson, string roomjson) {
-        BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(boxjson);
-        RoomJSON room = JsonUtility.FromJson<RoomJSON>(roomjson);
+    void generateWebBoxes(string json) {
+        BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(json);
+        RoomJSON room = boxes.room;
         BinPackResult packedboxes = binPackWebBoxes(jsonDeserializeBox(boxes), jsonDeserializeRoom(room));
         foreach(Cuboid box in packedboxes.BestResult) {
             var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);

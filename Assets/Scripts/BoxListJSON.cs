@@ -4,5 +4,6 @@ using UnityEngine;
 [Serializable]
 public class BoxListJSON 
 {
-   public BoxJSON[] boxlist;
+   public RoomJSON room;
+   public BoxJSON[] boxes;
 }
