@@ -59,13 +59,15 @@ public class SpawnerScript : MonoBehaviour
             dimensions[i] = new int[3] { (int)cubes[i].Width, (int)cubes[i].Height, (int)cubes[i].Depth };
             coordinates[i] = new int[3] { (int)cubes[i].X, (int)cubes[i].Y, (int)cubes[i].Z };
         }
-        generateWebBoxes(mockjson.text);
+        //generateWebBoxes(mockjson.text);
+        generateBoxes(dimensions, coordinates);
     }
     
     BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
         List<Cuboid> cubes = new List<Cuboid>();
         foreach(string[] box in boxes) {
             Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[0]);
+            Debug.Log(cube);
             cubes.Add(cube);
         }
         var binPacker = BinPacker.GetDefault(BinPackerVerifyOption.BestOnly);
@@ -81,8 +83,7 @@ public class SpawnerScript : MonoBehaviour
             temp[1] = boxesjson.boxes[i].x;
             temp[2] = boxesjson.boxes[i].y;
             temp[3] = boxesjson.boxes[i].z;
-            boxarray[i] = temp;
-            
+            boxarray[i] = temp;           
          
         }
         return boxarray;
@@ -101,7 +102,9 @@ public class SpawnerScript : MonoBehaviour
         BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(json);
         RoomJSON room = boxes.room;
         BinPackResult packedboxes = binPackWebBoxes(jsonDeserializeBox(boxes), jsonDeserializeRoom(room));
-        foreach(Cuboid box in packedboxes.BestResult[0]) {
+        Debug.Log(packedboxes.BestResult[0].Count);
+        for(int i = 0; i < packedboxes.BestResult[0].Count; i++) {
+            Cuboid box = packedboxes.BestResult[0][i];
             var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);
 
             //MeshRenderer creates the meshes needed to visualize each box
