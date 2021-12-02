@@ -8,11 +8,13 @@ using System.Runtime.InteropServices;
 /// </summary>
 [RequireComponent(typeof (MeshFilter))]
 [RequireComponent(typeof (MeshRenderer))]
+[RequireComponent(typeof (MeshCollider))]
 public class BoxGenerator : MonoBehaviour
 {
     public int[] testcoordinates;
     public int[] testdimensions;
     public int boxid;
+    public string webboxid;
     private float dist;
     private Vector3 v3Offset;
     private Plane plane;
@@ -57,7 +59,9 @@ public class BoxGenerator : MonoBehaviour
 
         Mesh mesh = GetComponent<MeshFilter>().mesh;
         mesh.vertices = vertices;
-        mesh.triangles = triangles;      
+        mesh.triangles = triangles;  
+        MeshCollider meshcol = GetComponent<MeshCollider>();
+        meshcol.sharedMesh = mesh;    
     }
 
     [DllImport("__Internal")]
