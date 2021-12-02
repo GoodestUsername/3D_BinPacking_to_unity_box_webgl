@@ -58,22 +58,44 @@ public class SpawnerScript : MonoBehaviour
             dimensions[i] = new int[3] { (int)cubes[i].Width, (int)cubes[i].Height, (int)cubes[i].Depth };
             coordinates[i] = new int[3] { (int)cubes[i].X, (int)cubes[i].Y, (int)cubes[i].Z };
         }
-        //generateWebBoxes(binPackWebBoxes(boxeslist, roomdimensions));
-        generateBoxes(dimensions, coordinates);
+        //generateBoxes(dimensions, coordinates);
     }
     
     BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
         List<Cuboid> cubes = new List<Cuboid>();
         foreach(string[] box in boxes) {
-            Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[4]);
+            Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[0]);
             cubes.Add(cube);
         }
         var binPacker = BinPacker.GetDefault(BinPackerVerifyOption.BestOnly);
-        BinPackParameter parameter = new BinPackParameter(Convert.ToDecimal(room[1]), Convert.ToDecimal(room[2]), Convert.ToDecimal(room[3]), cubes);
+        BinPackParameter parameter = new BinPackParameter(Convert.ToDecimal(room[0]), Convert.ToDecimal(room[1]), Convert.ToDecimal(room[2]), cubes);
         return binPacker.Pack(parameter);               
     }
+
+    string[][] jsonDeserializeBox(BoxListJSON boxes) {
+        string[][] boxarray = new string[boxes.boxlist.Length][];
+        for(int i = 0; i < boxes.boxlist.Length; i++) {
+            boxarray[i][0] = boxes.boxlist[i].id;
+            boxarray[i][1] = boxes.boxlist[i].x;
+            boxarray[i][2] = boxes.boxlist[i].y;
+            boxarray[i][3] = boxes.boxlist[i].z;
+        }
+        return boxarray;
+    }
+
+    string[] jsonDeserializeRoom(RoomJSON room) {
+        string[] roomarray = new string[3];        
+            roomarray[0] = room.x;
+            roomarray[1] = room.y;
+            roomarray[2] = room.z;        
+        return roomarray;
+
+    }
     //Preliminary Method for Working With Database
-    void generateWebBoxes(BinPackResult packedboxes) {
+    void generateWebBoxes(string boxjson, string roomjson) {
+        BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(boxjson);
+        RoomJSON room = JsonUtility.FromJson<RoomJSON>(roomjson);
+        BinPackResult packedboxes = binPackWebBoxes(jsonDeserializeBox(boxes), jsonDeserializeRoom(room));
         foreach(Cuboid box in packedboxes.BestResult) {
             var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);
 
@@ -86,17 +108,6 @@ public class SpawnerScript : MonoBehaviour
             float newx = ((float)box.X + (float)(box.Width / 2));
             float newy = ((float)box.Y + (float)(box.Height / 2));
             float newz = ((float)box.Z + (float)(box.Depth / 2));
-            //newobj.Find("Canvas").localPosition = transform.InverseTransformPoint(new Vector3(newx, newy, newz));
-            
-            //Sets the text for the box's label
-            //TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            //labeltext.text = "Box #" + i.ToString();
-            
-            //Provides a collider so that boxes do not clip into each other
-            // BoxCollider boxcoll = newobj.GetComponent<BoxCollider>();
-            // boxcoll.size = new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]);
-            // boxcoll.center = new Vector3(coordinates[i][0], coordinates[i][1] + (dimensions[i][2] / 2f), coordinates[i][2]);
-            
 
             //Runs the prefab script so the box is generated
             int[] dimensions = new int[3] {(int)box.Width, (int)box.Height, (int)box.Depth};
