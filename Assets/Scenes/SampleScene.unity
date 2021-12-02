@@ -700,6 +700,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 2980654637140918189, guid: 2df414b36c9a1fe46b99fde8a6d35d98, type: 3}
+  mockjson: {fileID: 4900000, guid: 2900507785e57c44fa3a2efd32921dfc, type: 3}
 --- !u!4 &966527442
 Transform:
   m_ObjectHideFlags: 0

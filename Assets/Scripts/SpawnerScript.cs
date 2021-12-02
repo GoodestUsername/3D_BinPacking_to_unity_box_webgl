@@ -20,6 +20,7 @@ public class SpawnerScript : MonoBehaviour
     //Holds the starting positions of each box after they were generated with the 3DBinPacking
     public int[][] coordinates;
     static string WRITE_FILE_PATH = "Assets/Scripts/text_files/write.txt";
+    public  TextAsset mockjson;
     // Start is called before the first frame update
     private static List<Cuboid> getCuboidsFromFile(string path)
     {
@@ -58,7 +59,7 @@ public class SpawnerScript : MonoBehaviour
             dimensions[i] = new int[3] { (int)cubes[i].Width, (int)cubes[i].Height, (int)cubes[i].Depth };
             coordinates[i] = new int[3] { (int)cubes[i].X, (int)cubes[i].Y, (int)cubes[i].Z };
         }
-        //generateBoxes(dimensions, coordinates);
+        generateWebBoxes(mockjson.text);
     }
     
     BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
@@ -75,10 +76,14 @@ public class SpawnerScript : MonoBehaviour
     string[][] jsonDeserializeBox(BoxListJSON boxesjson) {
         string[][] boxarray = new string[boxesjson.boxes.Length][];
         for(int i = 0; i < boxesjson.boxes.Length; i++) {
-            boxarray[i][0] = boxesjson.boxes[i].id;
-            boxarray[i][1] = boxesjson.boxes[i].x;
-            boxarray[i][2] = boxesjson.boxes[i].y;
-            boxarray[i][3] = boxesjson.boxes[i].z;
+            string[] temp = new string[4];
+            temp[0] = boxesjson.boxes[i].id;
+            temp[1] = boxesjson.boxes[i].x;
+            temp[2] = boxesjson.boxes[i].y;
+            temp[3] = boxesjson.boxes[i].z;
+            boxarray[i] = temp;
+            
+         
         }
         return boxarray;
     }
@@ -96,7 +101,7 @@ public class SpawnerScript : MonoBehaviour
         BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(json);
         RoomJSON room = boxes.room;
         BinPackResult packedboxes = binPackWebBoxes(jsonDeserializeBox(boxes), jsonDeserializeRoom(room));
-        foreach(Cuboid box in packedboxes.BestResult) {
+        foreach(Cuboid box in packedboxes.BestResult[0]) {
             var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);
 
             //MeshRenderer creates the meshes needed to visualize each box
