@@ -20,6 +20,7 @@ public class SpawnerScript : MonoBehaviour
     //Holds the starting positions of each box after they were generated with the 3DBinPacking
     public int[][] coordinates;
     static string WRITE_FILE_PATH = "Assets/Scripts/text_files/write.txt";
+    public  TextAsset mockjson;
     // Start is called before the first frame update
     private static List<Cuboid> getCuboidsFromFile(string path)
     {
@@ -58,45 +59,82 @@ public class SpawnerScript : MonoBehaviour
             dimensions[i] = new int[3] { (int)cubes[i].Width, (int)cubes[i].Height, (int)cubes[i].Depth };
             coordinates[i] = new int[3] { (int)cubes[i].X, (int)cubes[i].Y, (int)cubes[i].Z };
         }
-        //generateWebBoxes(binPackWebBoxes(boxeslist, roomdimensions));
-        generateBoxes(dimensions, coordinates);
+        generateWebBoxes(mockjson.text);
+        //generateBoxes(dimensions, coordinates);
     }
     
     BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
         List<Cuboid> cubes = new List<Cuboid>();
         foreach(string[] box in boxes) {
-            Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[4]);
+            Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[0]);
             cubes.Add(cube);
         }
         var binPacker = BinPacker.GetDefault(BinPackerVerifyOption.BestOnly);
-        BinPackParameter parameter = new BinPackParameter(Convert.ToDecimal(room[1]), Convert.ToDecimal(room[2]), Convert.ToDecimal(room[3]), cubes);
+        BinPackParameter parameter = new BinPackParameter(Convert.ToDecimal(room[0]), Convert.ToDecimal(room[1]), Convert.ToDecimal(room[2]), cubes);
         return binPacker.Pack(parameter);               
     }
+
+    string[][] jsonDeserializeBox(BoxListJSON boxesjson) {
+        string[][] boxarray = new string[boxesjson.boxes.Length][];
+        for(int i = 0; i < boxesjson.boxes.Length; i++) {
+            string[] temp = new string[7];
+            temp[0] = boxesjson.boxes[i].id;
+            temp[1] = boxesjson.boxes[i].x;
+            temp[2] = boxesjson.boxes[i].y;
+            temp[3] = boxesjson.boxes[i].z;
+            temp[4] = boxesjson.boxes[i].r;
+            temp[5] = boxesjson.boxes[i].g;
+            temp[6] = boxesjson.boxes[i].b;
+            boxarray[i] = temp;           
+         
+        }
+        return boxarray;
+    }
+
+    string[] jsonDeserializeRoom(RoomJSON room) {
+        string[] roomarray = new string[3];        
+            roomarray[0] = room.x;
+            roomarray[1] = room.y;
+            roomarray[2] = room.z;        
+        return roomarray;
+
+    }
+
     //Preliminary Method for Working With Database
-    void generateWebBoxes(BinPackResult packedboxes) {
-        foreach(Cuboid box in packedboxes.BestResult) {
+    void generateWebBoxes(string json) {
+        BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(json);
+        RoomJSON room = boxes.room;
+        string[][] jsonBoxes = jsonDeserializeBox(boxes);
+        BinPackResult packedboxes = binPackWebBoxes(jsonBoxes, jsonDeserializeRoom(room));
+        for(int i = 0; i < packedboxes.BestResult[0].Count; i++) {
+            Cuboid box = packedboxes.BestResult[0][i];
             var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);
 
             //MeshRenderer creates the meshes needed to visualize each box
             MeshRenderer meshrend = newobj.GetComponent<MeshRenderer>();
+            int red = 0;
+            int green = 0;
+            int blue = 0;
+            for(int j = 0; j < jsonBoxes.Length; j++) {
+                if((string)box.Tag == jsonBoxes[i][0]) {
+                    red = int.Parse(jsonBoxes[i][4]);
+                    
+                    green = int.Parse(jsonBoxes[i][5]);
+                    
+                    blue = int.Parse(jsonBoxes[i][6]);
+                    
+                }
+            }
+            Debug.Log(red);
+            Debug.Log(green);
+            Debug.Log(blue);
             //Assigns a random color for each box to allow differentiation
-            meshrend.material.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            meshrend.material.color = new Color(red, green, blue);
 
             //Sets the label for each box
             float newx = ((float)box.X + (float)(box.Width / 2));
             float newy = ((float)box.Y + (float)(box.Height / 2));
             float newz = ((float)box.Z + (float)(box.Depth / 2));
-            //newobj.Find("Canvas").localPosition = transform.InverseTransformPoint(new Vector3(newx, newy, newz));
-            
-            //Sets the text for the box's label
-            //TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            //labeltext.text = "Box #" + i.ToString();
-            
-            //Provides a collider so that boxes do not clip into each other
-            // BoxCollider boxcoll = newobj.GetComponent<BoxCollider>();
-            // boxcoll.size = new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]);
-            // boxcoll.center = new Vector3(coordinates[i][0], coordinates[i][1] + (dimensions[i][2] / 2f), coordinates[i][2]);
-            
 
             //Runs the prefab script so the box is generated
             int[] dimensions = new int[3] {(int)box.Width, (int)box.Height, (int)box.Depth};
