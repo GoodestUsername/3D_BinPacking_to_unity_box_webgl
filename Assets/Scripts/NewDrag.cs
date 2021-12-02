@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
   /// <summary>
   /// @author Kibum Park
@@ -11,6 +10,9 @@ using UnityEngine;
      private float dist;
      private Vector3 v3Offset;
      private Plane plane;
+
+    [DllImport("__Internal")]
+    private static extern void SendBoxID(int boxid);
      
     //Allows the mouse cursor to hold the box in place while the left mouse button is held down and immobile
      void OnMouseDown() {
@@ -18,7 +20,9 @@ using UnityEngine;
          Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
          float dist;
          plane.Raycast (ray, out dist);
-         v3Offset = transform.position - ray.GetPoint (dist);         
+         v3Offset = transform.position - ray.GetPoint (dist); 
+               
+         SendBoxID(0);  
      }
      
     //Allows the box to move and follow the cursor while th mouse button is held down and mobile

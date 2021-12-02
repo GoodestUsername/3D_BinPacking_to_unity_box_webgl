@@ -50,7 +50,6 @@ public class SpawnerScript : MonoBehaviour
     void Start()
     {
         List<Cuboid> cubes = getCuboidsFromFile(WRITE_FILE_PATH);
-        Console.WriteLine(cubes);
         dimensions = new int[cubes.Count][];
         coordinates = new int[cubes.Count][];
 
@@ -59,8 +58,54 @@ public class SpawnerScript : MonoBehaviour
             dimensions[i] = new int[3] { (int)cubes[i].Width, (int)cubes[i].Height, (int)cubes[i].Depth };
             coordinates[i] = new int[3] { (int)cubes[i].X, (int)cubes[i].Y, (int)cubes[i].Z };
         }
-        
+        //generateWebBoxes(binPackWebBoxes(boxeslist, roomdimensions));
         generateBoxes(dimensions, coordinates);
+    }
+    
+    BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
+        List<Cuboid> cubes = new List<Cuboid>();
+        foreach(string[] box in boxes) {
+            Cuboid cube = new Cuboid(Convert.ToDecimal(box[1]), Convert.ToDecimal(box[2]), Convert.ToDecimal(box[3]), 0, box[4]);
+            cubes.Add(cube);
+        }
+        var binPacker = BinPacker.GetDefault(BinPackerVerifyOption.BestOnly);
+        BinPackParameter parameter = new BinPackParameter(Convert.ToDecimal(room[1]), Convert.ToDecimal(room[2]), Convert.ToDecimal(room[3]), cubes);
+        return binPacker.Pack(parameter);               
+    }
+    //Preliminary Method for Working With Database
+    void generateWebBoxes(BinPackResult packedboxes) {
+        foreach(Cuboid box in packedboxes.BestResult) {
+            var newobj = Instantiate(prefab, new Vector3((float)box.Width, (float)box.Height, (float)box.Depth), Quaternion.identity);
+
+            //MeshRenderer creates the meshes needed to visualize each box
+            MeshRenderer meshrend = newobj.GetComponent<MeshRenderer>();
+            //Assigns a random color for each box to allow differentiation
+            meshrend.material.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+
+            //Sets the label for each box
+            float newx = ((float)box.X + (float)(box.Width / 2));
+            float newy = ((float)box.Y + (float)(box.Height / 2));
+            float newz = ((float)box.Z + (float)(box.Depth / 2));
+            //newobj.Find("Canvas").localPosition = transform.InverseTransformPoint(new Vector3(newx, newy, newz));
+            
+            //Sets the text for the box's label
+            //TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            //labeltext.text = "Box #" + i.ToString();
+            
+            //Provides a collider so that boxes do not clip into each other
+            // BoxCollider boxcoll = newobj.GetComponent<BoxCollider>();
+            // boxcoll.size = new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]);
+            // boxcoll.center = new Vector3(coordinates[i][0], coordinates[i][1] + (dimensions[i][2] / 2f), coordinates[i][2]);
+            
+
+            //Runs the prefab script so the box is generated
+            int[] dimensions = new int[3] {(int)box.Width, (int)box.Height, (int)box.Depth};
+            int[] coordinates = new int[3] {(int)box.X, (int)box.Y, (int)box.Z};
+            var newobjscript = newobj.GetComponent<BoxGenerator>();
+            newobjscript.testdimensions = dimensions;
+            newobjscript.testcoordinates = coordinates;
+            newobjscript.webboxid = box.Tag.ToString();
+        }
     }
     //Creates several BoxGen Objects based on how many elements are in the coordinates/dimensions array
     void generateBoxes(int[][] dimensions, int[][] coordinates) {
@@ -74,22 +119,19 @@ public class SpawnerScript : MonoBehaviour
                 meshrend.material.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
 
                 //Sets the label for each box
-                float newx = (coordinates[i][0] + (dimensions[i][0] / 2f));
-                Debug.Log(newx);
-                float newy = (coordinates[i][1] + (dimensions[i][1] / 2f));
-                Debug.Log(newy);
-                float newz = coordinates[i][2] + 0.5f;
-                Debug.Log(newz);
-                newobj.Find("Canvas").localPosition = new Vector3(newx, newy, newz);
+                float newx = (coordinates[i][0] / 1f+ (dimensions[i][0] / 2f));
+                float newy = (coordinates[i][1] / 1f + (dimensions[i][1] / 2f));
+                float newz = coordinates[i][2] / 1f + 0.5f;
+                //newobj.Find("Canvas").localPosition = transform.InverseTransformPoint(new Vector3(newx, newy, newz));
+                
+                //Sets the text for the box's label
+                //TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                //labeltext.text = "Box #" + i.ToString();
                 
                 //Provides a collider so that boxes do not clip into each other
-                BoxCollider boxcoll = newobj.GetComponent<BoxCollider>();
-                boxcoll.size = new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]);
-                boxcoll.center = new Vector3(newx, newy, coordinates[i][2] + (dimensions[i][2] / 2f));
-
-                //Sets the text for the box's label
-                TMPro.TextMeshProUGUI labeltext = newobj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                labeltext.text = "Box #" + i.ToString();
+                //boxcoll.size = transform.TransformVector(new Vector3(dimensions[i][0], dimensions[i][1], dimensions[i][2]));
+                //boxcoll.center = transform.InverseTransformPoint(new Vector3(coordinates[i][0], coordinates[i][1] + (dimensions[i][2] / 2f), coordinates[i][2]));
+                
 
                 //Runs the prefab script so the box is generated
                 var newobjscript = newobj.GetComponent<BoxGenerator>();

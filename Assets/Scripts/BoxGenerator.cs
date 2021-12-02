@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
-using System;
-using Random=UnityEngine.Random;
+using System.Runtime.InteropServices;
 /// <summary>
 /// @author Kibum Park
 /// @version 2.0
@@ -12,11 +8,18 @@ using Random=UnityEngine.Random;
 /// </summary>
 [RequireComponent(typeof (MeshFilter))]
 [RequireComponent(typeof (MeshRenderer))]
+[RequireComponent(typeof (MeshCollider))]
 public class BoxGenerator : MonoBehaviour
 {
     public int[] testcoordinates;
     public int[] testdimensions;
     public int boxid;
+    public string webboxid;
+    private float dist;
+    private Vector3 v3Offset;
+    private Plane plane;
+
+    
     void Start()
     {
         createCube(testcoordinates, testdimensions);
@@ -25,15 +28,19 @@ public class BoxGenerator : MonoBehaviour
     //This is done by using a variety of combinations between coodinates/dimensions points and their sums.
     public void createCube(int[] coor, int[] dims) {
         Vector3[] vertices = {
-            new Vector3 (coor[0], coor[1], coor[2]),
-            new Vector3 (coor[0] + dims[0], coor[1], coor[2]),
-            new Vector3 (coor[0] + dims[0], coor[1] + dims[1], coor[2]),
-            new Vector3 (coor[0], coor[1] + dims[1], coor[2]),
-            new Vector3 (coor[0], coor[1] + dims[1], coor[2] + dims[2]),
-            new Vector3 (coor[0] + dims[0], coor[1] + dims[1], coor[2]+ dims[2]),            
-            new Vector3 (coor[0] + dims[0], coor[1], coor[2] + dims[2]),
-            new Vector3 (coor[0], coor[1], coor[2] + dims[2]),     
+            transform.InverseTransformPoint(new Vector3 (coor[0], coor[1], coor[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0] + dims[0], coor[1], coor[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0] + dims[0], coor[1] + dims[1], coor[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0], coor[1] + dims[1], coor[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0], coor[1] + dims[1], coor[2] + dims[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0] + dims[0], coor[1] + dims[1], coor[2]+ dims[2])),            
+            transform.InverseTransformPoint(new Vector3 (coor[0] + dims[0], coor[1], coor[2] + dims[2])),
+            transform.InverseTransformPoint(new Vector3 (coor[0], coor[1], coor[2] + dims[2])),     
         };
+        // Debug.Log(vertices);
+        // for(int i = 0; i < vertices.Length; i++) {
+        //     vertices[i] = transform.TransformPoint(vertices[i]);
+        // }
 
         int[] triangles = {
             0, 2, 1, //face front
@@ -52,6 +59,31 @@ public class BoxGenerator : MonoBehaviour
 
         Mesh mesh = GetComponent<MeshFilter>().mesh;
         mesh.vertices = vertices;
-        mesh.triangles = triangles;      
+        mesh.triangles = triangles;  
+        MeshCollider meshcol = GetComponent<MeshCollider>();
+        meshcol.sharedMesh = mesh;    
     }
+
+    [DllImport("__Internal")]
+    private static extern void SendBoxID(int boxid);
+     
+    //Allows the mouse cursor to hold the box in place while the left mouse button is held down and immobile
+     void OnMouseDown() {
+         plane.SetNormalAndPosition(Camera.main.transform.forward, transform.position);
+         Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+         float dist;
+         plane.Raycast (ray, out dist);
+         v3Offset = transform.position - ray.GetPoint (dist);                
+         //SendBoxID(boxid);  
+         Debug.Log(boxid);
+     }
+     
+    //Allows the box to move and follow the cursor while th mouse button is held down and mobile
+     void OnMouseDrag() {
+          Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+          float dist;
+          plane.Raycast (ray, out dist);
+          Vector3 v3Pos = ray.GetPoint (dist);
+          transform.position = v3Pos + v3Offset;    
+     }
 }
