@@ -11,19 +11,22 @@ using System.Runtime.InteropServices;
 [RequireComponent(typeof (MeshCollider))]
 public class BoxGenerator : MonoBehaviour
 {
-    public int[] testcoordinates;
-    public int[] testdimensions;
+    public int[] coordinates;
+    public int[] dimensions;
     public int boxid;
     public string webboxid;
     private float dist;
     private Vector3 v3Offset;
     private Plane plane;
 
-    
+    /// <summary>
+    /// Create cube with coords and dimensions.
+    /// </summary>
     void Start()
     {
         createCube(testcoordinates, testdimensions);
     }
+
     //To create a box, there needs to be eight points of the box set.
     //This is done by using a variety of combinations between coodinates/dimensions points and their sums.
     public void createCube(int[] coor, int[] dims) {

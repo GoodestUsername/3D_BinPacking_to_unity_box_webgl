@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Class to serialize input json from db for individual boxes
+/// </summary>
 [Serializable]
 public class BoxJSON 
 {

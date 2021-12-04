@@ -21,7 +21,14 @@ public class SpawnerScript : MonoBehaviour
     public int[][] coordinates;
     static string WRITE_FILE_PATH = "Assets/Scripts/text_files/write.txt";
     public  TextAsset mockjson;
-    // Start is called before the first frame update
+
+    /// <summary>
+    /// @Author: Eric Dong, Kibum
+    /// @version 2.0
+    /// Deserializes json into list of cubes from file.
+    /// </summary>
+    /// <param name="path"> path of input file</param>
+    /// <returns></returns>
     private static List<Cuboid> getCuboidsFromFile(string path)
     {
         List<Cuboid> cubes = new List<Cuboid>();
@@ -43,6 +50,7 @@ public class SpawnerScript : MonoBehaviour
 
         return cubes;
     }
+    // Start is called before the first frame update
     /// <summary>
     /// @Author: Eric Dong, Kibum
     /// @version 2.0
@@ -63,6 +71,14 @@ public class SpawnerScript : MonoBehaviour
         //generateBoxes(dimensions, coordinates);
     }
     
+    /// <summary>
+    /// @Author: Eric Dong
+    /// @version: 2.0
+    /// converts 2d string array of boxes, and array of room into cuboids and return the binpack.
+    /// </summary>
+    /// <param name="boxes">List of string array</param>
+    /// <param name="room">String array</param>
+    /// <returns></returns>
     BinPackResult binPackWebBoxes(string[][] boxes, string[] room) {
         List<Cuboid> cubes = new List<Cuboid>();
         foreach(string[] box in boxes) {
@@ -74,6 +90,13 @@ public class SpawnerScript : MonoBehaviour
         return binPacker.Pack(parameter);               
     }
 
+    /// <summary>
+    /// @Author: Eric Dong, Kibum Park
+    /// @Version: 3.0
+    /// Deserialize json into box array
+    /// </summary>
+    /// <param name="boxesjson"></param>
+    /// <returns></returns>
     string[][] jsonDeserializeBox(BoxListJSON boxesjson) {
         string[][] boxarray = new string[boxesjson.boxes.Length][];
         for(int i = 0; i < boxesjson.boxes.Length; i++) {
@@ -91,6 +114,13 @@ public class SpawnerScript : MonoBehaviour
         return boxarray;
     }
 
+    /// <summary>
+    /// @Author: Kibum Park
+    /// @version 1.0
+    /// Deserializes room in json into roomarray
+    /// </summary>
+    /// <param name="room">Room json</param>
+    /// <returns></returns>
     string[] jsonDeserializeRoom(RoomJSON room) {
         string[] roomarray = new string[3];        
             roomarray[0] = room.x;
@@ -100,7 +130,11 @@ public class SpawnerScript : MonoBehaviour
 
     }
 
-    //Preliminary Method for Working With Database
+    /// <summary>
+    /// @Author: Eric Dong, Kibum Park
+    /// Preliminary Method for Working With Database, generates the webboxes from json, and displays them in unity.
+    /// </summary>
+    /// <param name="json"></param>
     void generateWebBoxes(string json) {
         BoxListJSON boxes = JsonUtility.FromJson<BoxListJSON>(json);
         RoomJSON room = boxes.room;
@@ -115,6 +149,7 @@ public class SpawnerScript : MonoBehaviour
             float red = 0;
             float green = 0;
             float blue = 0;
+            // Compares ID to fetch box colors from original box list
             for(int j = 0; j < jsonBoxes.Length; j++) {
                 if((string)box.Tag == jsonBoxes[i][0]) {
                     red = float.Parse(jsonBoxes[i][4]);
@@ -145,7 +180,13 @@ public class SpawnerScript : MonoBehaviour
             newobjscript.webboxid = box.Tag.ToString();
         }
     }
-    //Creates several BoxGen Objects based on how many elements are in the coordinates/dimensions array
+    /// <summary>
+    /// @Author: Eric Dong, Kibum Park
+    /// @version: 5.0
+    /// Creates several BoxGen Objects based on how many elements are in the coordinates/dimensions array
+    /// </summary>
+    /// <param name="dimensions"></param>
+    /// <param name="coordinates"></param>
     void generateBoxes(int[][] dimensions, int[][] coordinates) {
         if(dimensions.Length == coordinates.Length) {
             for(int i = 0; i < dimensions.Length; i++) {
