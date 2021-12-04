@@ -112,16 +112,16 @@ public class SpawnerScript : MonoBehaviour
 
             //MeshRenderer creates the meshes needed to visualize each box
             MeshRenderer meshrend = newobj.GetComponent<MeshRenderer>();
-            int red = 0;
-            int green = 0;
-            int blue = 0;
+            float red = 0;
+            float green = 0;
+            float blue = 0;
             for(int j = 0; j < jsonBoxes.Length; j++) {
                 if((string)box.Tag == jsonBoxes[i][0]) {
-                    red = int.Parse(jsonBoxes[i][4]);
+                    red = float.Parse(jsonBoxes[i][4]);
                     
-                    green = int.Parse(jsonBoxes[i][5]);
+                    green = float.Parse(jsonBoxes[i][5]);
                     
-                    blue = int.Parse(jsonBoxes[i][6]);
+                    blue = float.Parse(jsonBoxes[i][6]);
                     
                 }
             }
@@ -129,7 +129,7 @@ public class SpawnerScript : MonoBehaviour
             Debug.Log(green);
             Debug.Log(blue);
             //Assigns a random color for each box to allow differentiation
-            meshrend.material.color = new Color(red, green, blue);
+            meshrend.material.color = new Color(red/255, green/255, blue/255);
 
             //Sets the label for each box
             float newx = ((float)box.X + (float)(box.Width / 2));
